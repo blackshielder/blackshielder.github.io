@@ -1,26 +1,60 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
   <title>留言板</title>
-  <style>
-    /* CSS 样式 */
-  </style>
-<script src="//aeu.alicdn.com/waf/interfaceacting220819.js"></script><script src="//aeu.alicdn.com/waf/antidomxss_v640.js"></script></head>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
 <body>
   <h1>留言板</h1>
-  
-  <form id="message-form" method="POST" action="https://api.staticman.net/v3/entry/github/liuzheyi666/liuzheyi666.github.io/master/comments">
-    <label for="name">姓名：</label>
-    <input type="text" id="name" name="name" required><br>
-    <label for="message">留言：</label>
-    <textarea id="message" name="message" rows="5" required></textarea><br>
-    <button type="submit">提交</button>
+
+  <form id="commentForm">
+    <textarea id="commentText" rows="4" cols="50"></textarea><br>
+    <button type="submit">提交留言</button>
   </form>
 
-  <ul id="message-list"></ul>
+  <div id="commentsList">
+    <!-- 留言列表将显示在这里 -->
+  </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-  <script src="script.js"></script> <!-- 后面会提供这个 script.js 文件 -->
+  <script>
+    $(document).ready(function() {
+      // 加载并显示已保存的留言
+      $.ajax({
+        url: 'comments.txt',
+        dataType: 'text',
+        success: function(data) {
+          $('#commentsList').text(data);
+        }
+      });
+
+      // 提交留言表单时保存留言到文本文件
+      $('#commentForm').submit(function(event) {
+        event.preventDefault(); // 阻止表单提交
+
+        var comment = $('#commentText').val();
+        if (comment) {
+          // 将新留言追加到已保存的留言中
+          $.ajax({
+            url: 'comments.txt',
+            dataType: 'text',
+            success: function(data) {
+              var allComments = data + '\n' + comment;
+              
+              // 保存合并后的留言到文本文件
+              $.ajax({
+                url: 'comments.txt',
+                type: 'PUT',
+                data: allComments,
+                success: function() {
+                  $('#commentsList').text(allComments);
+                  $('#commentText').val('');
+                }
+              });
+            }
+          });
+        }
+      });
+    });
+  </script>
 </body>
 </html>
